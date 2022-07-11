@@ -2,6 +2,10 @@ from requests import get,post
 import time
 import json
 
+from bs4 import BeautifulSoup
+import numpy as np
+from datetime import datetime
+from tqdm import tqdm
 
 def flag_404(response,html_soup):
     # examples
@@ -107,13 +111,7 @@ def flags_decode(s):
 
 
 
-from requests import get
-import json
-import time
-from bs4 import BeautifulSoup
-import numpy as np
-from datetime import datetime
-from tqdm import tqdm
+
 
 def get_decorated(url,timeout: int = 240):
     block = True
@@ -122,7 +120,7 @@ def get_decorated(url,timeout: int = 240):
             response = get(url)
             block = False
         except (ConnectionResetError, ConnectionError, OSError):
-            print('sleep')
+            print(f'sleep t={timeout}s')
             time.sleep(timeout)
     return response
 
@@ -133,13 +131,18 @@ class base_wykop:
     def __init__(self,
                  # api_key: str,
                  base_url: str = 'https://www.wykop.pl',
-                 method: str = 'ajax'):
+                 method: str = 'ajax',
+                 timeout: int = 240):
         self.base_url = base_url
         self.method  = method
+        self.timeout = timeout
+        
+    def _get_decorated_func(self):
+        return lambda x: get_decorated(x,timeout = self.timeout)
     
-    @staticmethod
-    def ajax_data(url: str):
-        response = get_decorated(url)
+    def ajax_data(self,
+                  url: str):
+        response = self._get_decorated_func()(url)
         return json.loads(response.text[8:])
     
     @staticmethod
@@ -173,7 +176,10 @@ class base_wykop:
                 data += datum
                 p += 1
                 
-        return data    
+        return data
+    
+
+        
     
 class user_wykop(base_wykop):
     
@@ -277,8 +283,8 @@ class link_wykop(base_wykop):
         return data['data']
     
 
-def link_ids_to_data(link_ids):
-    data = [link_wykop(link_id).basic_data() for link_id in link_ids]
+def link_ids_to_data(link_ids,timeout=240):
+    data = [link_wykop(link_id,timeout=timeout).basic_data() for link_id in link_ids]
     return data
 
 class list_wykop(base_wykop):
@@ -312,7 +318,7 @@ class list_wykop(base_wykop):
     
     def top_tags(self):
         url = 'https://www.wykop.pl/tagi/'
-        response = get_decorated(url)
+        response = self._get_decorated_func()(url)
         html_soup = BeautifulSoup(response.text, 'html.parser')
         out = html_soup.find(class_ = 'fix-tagline')
         out2 = out.find_all(class_ = 'tag create')
@@ -352,7 +358,7 @@ class tag_wykop(base_wykop):
             
             # print(first_id)
             url = f'https://www.wykop.pl/ajax2/tag/znaleziska/{self.tag}/najlepsze/next/link-{first_id}/'
-            response = get_decorated(url)
+            response = self._get_decorated_func()(url)
             out = json.loads(response.text[8:])
             out2 = out['operations'][0]['data']
             html_soup = BeautifulSoup(out2, 'html.parser')
@@ -402,7 +408,7 @@ class tag_wykop(base_wykop):
         for p in range(pages):
             # print(first_id)
             url = f'https://www.wykop.pl/ajax2/tag/znaleziska/{self.tag}/wszystkie/next/link-{first_id}/'
-            response = get_decorated(url)
+            response = self._get_decorated_func()(url)
             out = json.loads(response.text[8:])
             out2 = out['operations'][0]['data']
             html_soup = BeautifulSoup(out2, 'html.parser')
@@ -427,6 +433,8 @@ class tag_wykop(base_wykop):
                          pages: int):
         print('not implemented')
         return None    
+    
+    
     
 class mikroblog_wykop(base_wykop):
     
