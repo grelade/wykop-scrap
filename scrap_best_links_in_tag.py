@@ -1,3 +1,4 @@
+import argparse
 from requests import get
 import json
 import time
@@ -39,5 +40,5 @@ if __name__ == "__main__":
     links = tw.best_link_ids(mode='start_date',start_date=start_date,conv_to_data=True)
  
     df = pd.DataFrame(links)
-    
+    df['author'] = df['author'].apply(lambda x: x['login'])
     df.to_csv(links_file)
