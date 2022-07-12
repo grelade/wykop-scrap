@@ -15,6 +15,8 @@ from func import link_ids_to_data
 
 if __name__ == "__main__":
 
+    print(f'\n======= {os.path.basename(__file__)} =======\n')
+    
     parser = argparse.ArgumentParser()
     parser.add_argument('--ixs_file',default='',type=str)
     parser.add_argument('--links_file',default='',type=str)

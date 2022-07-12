@@ -8,14 +8,15 @@ from datetime import datetime,date,timedelta
 from tqdm import tqdm
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
 from func import base_wykop,user_wykop,link_wykop,list_wykop,tag_wykop,mikroblog_wykop
 from func import link_ids_to_data
 
-
-
 if __name__ == "__main__":
-
+    
+    print(f'\n======= {os.path.basename(__file__)} =======\n')
+    
     parser = argparse.ArgumentParser()
     parser.add_argument('--ixs_file',default='',type=str)
     parser.add_argument('--start_date',default='2022-07-01',type=str)
