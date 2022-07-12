@@ -36,7 +36,7 @@ if __name__ == "__main__":
     print(f'scraping links from {ixs_file}')
     link_ids = np.loadtxt(ixs_file,dtype=int)
     
-    links = link_ids_to_data(link_ids,timeout=timeout)
+    links = link_ids_to_data(link_ids,timeout=timeout,verbose=True)
 
     df = pd.DataFrame(links)
 

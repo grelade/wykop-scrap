@@ -283,8 +283,15 @@ class link_wykop(base_wykop):
         return data['data']
     
 
-def link_ids_to_data(link_ids,timeout=240):
-    data = [link_wykop(link_id,timeout=timeout).basic_data() for link_id in link_ids]
+def link_ids_to_data(link_ids: list,
+                     timeout: int = 240,
+                     verbose: bool = False):
+    
+    loop = tqdm(link_ids) if verbose else link_ids    
+    data = []
+    for link_id in loop:
+        data += [link_wykop(link_id,timeout=timeout).basic_data()]
+
     return data
 
 class list_wykop(base_wykop):
