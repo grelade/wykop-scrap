@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import os
 
 from func import base_wykop,user_wykop,link_wykop,list_wykop,tag_wykop,mikroblog_wykop
-from func import link_ids_to_data
+from func import link_ids_to_data, link_ids_to_votes
 
 if __name__ == "__main__":
 
@@ -19,29 +19,29 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser()
     parser.add_argument('--ixs_file',default='',type=str)
-    parser.add_argument('--links_file',default='',type=str)
+    parser.add_argument('--votes_file',default='',type=str)
     parser.add_argument('--timeout',default=240,type=int)
     # parser.add_argument('--overwrite',action="store_true")
     
     args = parser.parse_args()
     ixs_file = args.ixs_file
-    links_file = args.links_file
+    votes_file = args.votes_file
     timeout = args.timeout
     # overwrite = args.overwrite
 
-    if links_file == '':
+    if votes_file == '':
         s = os.path.splitext(ixs_file)
-        links_file = f'{s[0]}.link'
+        votes_file = f'{s[0]}.vote'
     
-    print(f'scraping links from {ixs_file}')
+    print(f'scraping votes from {ixs_file}')
     link_ids = np.loadtxt(ixs_file,dtype=int)
     
-    df = link_ids_to_data(link_ids,
-                          timeout=timeout,
-                          verbose=True,
-                          output_df=True)
+    df = link_ids_to_votes(link_ids,
+                           timeout=timeout,
+                           verbose=True,
+                           output_df = True)
+    df.to_csv(votes_file)
 
-    df.to_csv(links_file)
     print(f'scraped dataframe with {df.shape[0]} records and {df.shape[1]} fields')
-    print(f'...saving to {links_file}')
+    print(f'...saving to {votes_file}')
     

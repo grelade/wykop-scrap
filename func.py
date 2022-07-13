@@ -1,6 +1,7 @@
 from requests import get,post
 import time
 import json
+import pandas as pd
 
 from bs4 import BeautifulSoup
 import numpy as np
@@ -285,14 +286,64 @@ class link_wykop(base_wykop):
 
 def link_ids_to_data(link_ids: list,
                      timeout: int = 240,
-                     verbose: bool = False):
+                     verbose: bool = False,
+                     output_df: bool = False):
     
     loop = tqdm(link_ids) if verbose else link_ids    
     data = []
     for link_id in loop:
         data += [link_wykop(link_id,timeout=timeout).basic_data()]
+    
+    if output_df:
+        df = pd.DataFrame(data)
+        df['author'] = df['author'].apply(lambda x: x['login'])
 
-    return data
+        return df
+    else:
+        return data
+
+def link_ids_to_votes(link_ids: list,
+                      timeout: int = 240,
+                      verbose: bool = False,
+                      output_df: bool = False):
+    
+    loop = tqdm(link_ids) if verbose else link_ids
+    
+    df = None
+    
+    for link_id in loop:
+
+        lw = link_wykop(link_id,timeout=timeout)
+        out = lw.upvotes()
+        if len(out)>0:
+            df_up = pd.DataFrame(out)
+            
+            df_up['author'] = df_up['author'].apply(lambda x: x['login'])
+            df_up['link_id'] = link_id
+            df_up['vote_type'] = 1
+            df_up['reason'] = -1
+        else:
+            df_up = None
+            
+        out2 = lw.downvotes()
+        if len(out2)>0:
+            df_down = pd.DataFrame(out2)
+
+            df_down['author'] = df_down['author'].apply(lambda x: x['login'])
+            df_down['link_id'] = link_id
+            df_down['vote_type'] = -1
+        else:
+            df_down = None
+            
+        delta_df = pd.concat((df_down,df_up),axis=0)
+        df = delta_df if df is None else df.append(delta_df,ignore_index=True)
+    
+    if output_df:
+        return df
+    else:
+        data = df.to_dict(orient='records')
+        return data
+    
 
 class list_wykop(base_wykop):
     
@@ -450,3 +501,5 @@ class mikroblog_wykop(base_wykop):
                  **kwargs):
         
         super(mikroblog_wykop,self).__init__(*args,**kwargs)
+
+        
