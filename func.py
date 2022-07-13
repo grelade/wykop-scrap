@@ -344,7 +344,25 @@ def link_ids_to_votes(link_ids: list,
         data = df.to_dict(orient='records')
         return data
     
+def users_to_data(users: list,
+                  timeout: int = 240,
+                  verbose: bool = False,
+                  output_df: bool = False):
 
+    loop = tqdm(users) if verbose else users
+    
+    data = []
+    for user in loop:
+        uw = user_wykop(user,timeout=timeout)
+        data += [uw.basic_data()]
+    
+    if output_df:
+        return pd.DataFrame(data)
+    else:
+        return data
+    
+    
+    
 class list_wykop(base_wykop):
     
     def __init__(self,
