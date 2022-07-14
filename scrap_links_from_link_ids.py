@@ -36,7 +36,7 @@ if __name__ == "__main__":
     
     print(f'scraping links from {ixs_file}')
     link_ids = file.read_link_ids(ixs_file)
-    
+
     links_file_exists = os.path.exists(links_file)
     if not links_file_exists or overwrite:
     

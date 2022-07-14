@@ -296,7 +296,8 @@ def link_ids_to_data(link_ids: list,
     
     if output_df:
         df = pd.DataFrame(data)
-        df['author'] = df['author'].apply(lambda x: x['login'])
+        if 'author' in df.keys():
+            df['author'] = df['author'].apply(lambda x: x['login'])
 
         return df
     else:
