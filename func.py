@@ -449,11 +449,13 @@ class tag_wykop(base_wykop):
                     out4 += [o]
             
             delta_ids = [int(o.split('/')[-3]) for o in out4]
+            print(delta_ids)
+            if len(delta_ids)==0:
+                break
             
             first_id = delta_ids[-1]
             link_ids += delta_ids
-            
-            
+
             if mode == 'start_date':
                 curr_date = datetime.fromisoformat(link_wykop(first_id).basic_data()['date'])
                 if start_date > curr_date:
