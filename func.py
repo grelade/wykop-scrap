@@ -449,7 +449,7 @@ class tag_wykop(base_wykop):
                     out4 += [o]
             
             delta_ids = [int(o.split('/')[-3]) for o in out4]
-            print(delta_ids)
+
             if len(delta_ids)==0:
                 break
             
@@ -465,6 +465,16 @@ class tag_wykop(base_wykop):
                     break
                 p+=1
             
+        # trim extra link_ids
+        i=0
+        for i,link_id in enumerate(link_ids[::-1]):
+            o = link_wykop(link_id).basic_data()
+            if start_date <= datetime.fromisoformat(o['date']): 
+                break
+
+        link_ids = link_ids[:-i] if i>0 else link_ids
+        
+        #convert to data
         if conv_to_data:
             out = link_ids_to_data(link_ids)
             out2 = []

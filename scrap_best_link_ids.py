@@ -46,13 +46,6 @@ if __name__ == "__main__":
                                   start_date=start_date,
                                   conv_to_data=False)
 
-        #trim extra indices
-        for i,link_id in enumerate(output[::-1]):
-            o = link_wykop(link_id,timeout=timeout).basic_data()
-            if datetime.fromisoformat(start_date) <= datetime.fromisoformat(o['date']): 
-                break
-
-        output = output[:-i] if i>0 else output
         print(f'... found {len(output)} link_ids.')
         print(f'saving to {ixs_file}')
 
