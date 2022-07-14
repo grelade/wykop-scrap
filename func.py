@@ -354,7 +354,9 @@ def users_to_data(users: list,
     data = []
     for user in loop:
         uw = user_wykop(user,timeout=timeout)
-        data += [uw.basic_data()]
+        out = uw.basic_data()
+        if out:
+            data += [out]
     
     if output_df:
         return pd.DataFrame(data)
@@ -521,3 +523,29 @@ class mikroblog_wykop(base_wykop):
         super(mikroblog_wykop,self).__init__(*args,**kwargs)
 
         
+
+class file:
+        
+    def read_link_ids(ixs_file):
+        return np.loadtxt(ixs_file,dtype=int,ndmin=1)
+
+    def save_link_ids(ixs,ixs_file):
+        np.savetxt(ixs_file,ixs,fmt='%d')
+
+    def read_links(links_file):
+        return pd.read_csv(links_file,index_col=0)
+
+    def save_links(df,links_file):
+        df.to_csv(links_file)
+
+    def read_user(user_file):
+        pass
+
+    def save_user(df,user_file):
+        df.to_csv(user_file)
+
+    def read_votes(vote_file):
+        pass
+
+    def save_votes(df,votes_file):
+        df.to_csv(votes_file)
