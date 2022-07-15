@@ -401,7 +401,7 @@ class list_wykop(base_wykop):
         html_soup = BeautifulSoup(response.text, 'html.parser')
         out = html_soup.find(class_ = 'fix-tagline')
         out2 = out.find_all(class_ = 'tag create')
-        out3 = [o['href'].split('/')[-2] for o in out2]
+        out3 = [o['href'].split('/')[-2].lower() for o in out2]
         return out3
 
 
@@ -414,7 +414,7 @@ class tag_wykop(base_wykop):
                  **kwargs):
         
         super(tag_wykop,self).__init__(*args,**kwargs) 
-        self.tag = tag
+        self.tag = tag.lower()
     
     
     
