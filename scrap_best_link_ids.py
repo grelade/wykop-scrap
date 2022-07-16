@@ -41,6 +41,8 @@ if __name__ == "__main__":
     ixs_file_exists = os.path.exists(ixs_file)
     if not ixs_file_exists or overwrite:
         
+        file.save_link_ids([],ixs_file)
+        
         tw = tag_wykop(tag,timeout=timeout)
         output = tw.best_link_ids(mode='start_date',
                                   start_date=start_date,

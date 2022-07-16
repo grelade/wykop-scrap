@@ -40,6 +40,8 @@ if __name__ == "__main__":
     votes_file_exists = os.path.exists(votes_file)
     if not votes_file_exists or overwrite:
         
+        file.save_votes(pd.DataFrame([]),votes_file)
+        
         df = link_ids_to_votes(link_ids,
                                timeout=timeout,
                                verbose=True,

@@ -40,6 +40,8 @@ if __name__ == "__main__":
     links_file_exists = os.path.exists(links_file)
     if not links_file_exists or overwrite:
     
+        file.save_links(pd.DataFrame([]),links_file)
+        
         df = link_ids_to_data(link_ids,
                               timeout=timeout,
                               verbose=True,

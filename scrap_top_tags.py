@@ -33,6 +33,8 @@ if __name__ == "__main__":
     tags_file_exists = os.path.exists(tags_file)
     if not tags_file_exists or overwrite:
         
+        file.save_tags([],tags_file)
+        
         w = list_wykop()
         tags = w.top_tags()
         

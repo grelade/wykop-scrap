@@ -40,6 +40,8 @@ if __name__ == "__main__":
     user_file_exists = os.path.exists(user_file)
     if not user_file_exists or overwrite:
     
+        file.save_user(pd.DataFrame([]),user_file)
+    
         users = links['author'].unique()
 
         df = users_to_data(users,
