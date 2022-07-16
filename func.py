@@ -438,7 +438,12 @@ class tag_wykop(base_wykop):
             # print(first_id)
             url = f'https://www.wykop.pl/ajax2/tag/znaleziska/{self.tag}/najlepsze/next/link-{first_id}/'
             response = self._get_decorated_func()(url)
-            out = json.loads(response.text[8:])
+            r = response.text[8:]
+            if r == '':
+                # no link_ids found
+                link_ids = []
+                break 
+            out = json.loads(r)
             out2 = out['operations'][0]['data']
             html_soup = BeautifulSoup(out2, 'html.parser')
             out3 = html_soup.find_all(class_="media-content m-reset-float")
