@@ -567,3 +567,12 @@ class file:
 
     def save_votes(df,votes_file):
         df.to_csv(votes_file)
+        
+    def read_votes(votes_file):
+        return pd.read_csv(votes_file,index_col=0)
+        
+    def save_tags(tags,tags_file):
+        np.savetxt(tags_file,tags,fmt='%s')
+        
+    def read_tags(tags_file):
+        return np.loadtxt(tags_file,dtype=str)
