@@ -34,9 +34,9 @@ if __name__ == "__main__":
     overwrite = args.overwrite
 
     if ixs_file == '':
-        ixs_file = f'data/best_{tag}_{start_date}_{end_date}.id'
+        ixs_file = f'data/all_{tag}_{start_date}_{end_date}.id'
     
-    print(f'scraping best link_ids in tag {tag}; starting date {start_date}...')
+    print(f'scraping all link_ids in tag {tag}; starting date {start_date}...')
     
     ixs_file_exists = os.path.exists(ixs_file)
     if not ixs_file_exists or overwrite:
@@ -44,7 +44,7 @@ if __name__ == "__main__":
         file.save_link_ids([],ixs_file)
         
         tw = tag_wykop(tag,timeout=timeout)
-        output = tw.best_link_ids(mode='start_date',
+        output = tw.all_link_ids(mode='start_date',
                                   start_date=start_date,
                                   conv_to_data=False)
 

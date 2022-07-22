@@ -7,6 +7,9 @@ from bs4 import BeautifulSoup
 import numpy as np
 from datetime import datetime
 from tqdm import tqdm
+        
+from jinja2 import Template
+import plotly
 
 def flag_404(response,html_soup):
     # examples
@@ -494,31 +497,108 @@ class tag_wykop(base_wykop):
             return out2
         else:
             return link_ids
-    
-    def recent_link_ids(self,
-                        pages: int,
-                        conv_to_data: bool = True):
+
+def all_link_ids(self,
+                 start_date: str,
+                 mode: str='start_date', # or pages
+                 pages: int = 0,
+                 conv_to_data: bool = True):
 
         first_id = 1
         link_ids = []
-        for p in range(pages):
+        
+        if mode == 'start_date':
+            start_date = datetime.fromisoformat(start_date)
+        elif mode == 'pages':
+            p = 0
+        
+        stop = False
+        while not stop:
+            
             # print(first_id)
             url = f'https://www.wykop.pl/ajax2/tag/znaleziska/{self.tag}/wszystkie/next/link-{first_id}/'
             response = self._get_decorated_func()(url)
-            out = json.loads(response.text[8:])
+            r = response.text[8:]
+            if r == '':
+                # no link_ids found
+                link_ids = []
+                break 
+            out = json.loads(r)
             out2 = out['operations'][0]['data']
             html_soup = BeautifulSoup(out2, 'html.parser')
             out3 = html_soup.find_all(class_="media-content m-reset-float")
-            delta_ids = [int(o.a['href'].split('/')[-3]) for o in out3]
+            out3 = [o.a['href'] for o in out3]
+            
+            out4 = []
+            for o in out3:
+                if o != 'https://www.wykop.pl/rejestracja/':
+                    out4 += [o]
+            
+            delta_ids = [int(o.split('/')[-3]) for o in out4]
+
+            if len(delta_ids)==0:
+                break
             
             first_id = delta_ids[-1]
+            link_ids += delta_ids
+
+            if mode == 'start_date':
+                curr_date = datetime.fromisoformat(link_wykop(first_id).basic_data()['date'])
+                if start_date > curr_date:
+                    break
+            elif mode == 'pages':
+                if p<=pages:
+                    break
+                p+=1
             
-            link_ids+=delta_ids 
+        # trim extra link_ids
+        i=0
+        for i,link_id in enumerate(link_ids[::-1]):
+            o = link_wykop(link_id).basic_data()
+            if start_date <= datetime.fromisoformat(o['date']): 
+                break
+
+        link_ids = link_ids[:-i] if i>0 else link_ids
         
+        #convert to data
         if conv_to_data:
-            return 
+            out = link_ids_to_data(link_ids)
+            out2 = []
+            
+            for o in out:
+                if start_date <= datetime.fromisoformat(o['date']): 
+                    out2 += [o]
+                # else:
+                #     break
+            
+            return out2
         else:
-            return link_ids
+            return link_ids        
+        
+#     def all_link_ids(self,
+#                         pages: int,
+#                         conv_to_data: bool = True):
+
+#         first_id = 1
+#         link_ids = []
+#         for p in range(pages):
+#             # print(first_id)
+#             url = f'https://www.wykop.pl/ajax2/tag/znaleziska/{self.tag}/wszystkie/next/link-{first_id}/'
+#             response = self._get_decorated_func()(url)
+#             out = json.loads(response.text[8:])
+#             out2 = out['operations'][0]['data']
+#             html_soup = BeautifulSoup(out2, 'html.parser')
+#             out3 = html_soup.find_all(class_="media-content m-reset-float")
+#             delta_ids = [int(o.a['href'].split('/')[-3]) for o in out3]
+            
+#             first_id = delta_ids[-1]
+            
+#             link_ids+=delta_ids 
+        
+#         if conv_to_data:
+#             return 
+#         else:
+#             return link_ids
     
     def best_entry_ids(self,
                        pages: int):
@@ -569,8 +649,25 @@ class file:
         df.to_csv(votes_file)
         
     def read_tags(tags_file):
-        return np.loadtxt(tags_file,dtype=str)
+        return np.loadtxt(tags_file,dtype=str,ndmin=1)
     
     def save_tags(tags,tags_file):
         np.savetxt(tags_file,tags,fmt='%s')
         
+        
+
+
+def fig_to_plotly_js(fig,output_file='output.html'):
+    '''
+    generate plotly figure in html format read to use on the web
+    '''
+    plot_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    
+    template = u"""<div id="plotly-fig"></div><script src="https://cdn.plot.ly/plotly-latest.min.js"></script><script>var graph = {{plot_json}};Plotly.plot('plotly-fig', graph, {});</script>"""
+    data = {"plot_json": plot_json}
+    j2_template = Template(template)
+    
+    out = j2_template.render(data,trim_blocks=True,lstrip_blocks=True)
+    
+    with open(output_file,'w') as f:
+        f.write(out)
