@@ -498,11 +498,11 @@ class tag_wykop(base_wykop):
         else:
             return link_ids
 
-def all_link_ids(self,
-                 start_date: str,
-                 mode: str='start_date', # or pages
-                 pages: int = 0,
-                 conv_to_data: bool = True):
+    def all_link_ids(self,
+                     start_date: str,
+                     mode: str='start_date', # or pages
+                     pages: int = 0,
+                     conv_to_data: bool = True):
 
         first_id = 1
         link_ids = []
