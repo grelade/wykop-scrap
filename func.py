@@ -270,8 +270,9 @@ class link_wykop(base_wykop):
         url = f'{self.base_url}/ajax2/links/link/{self.link_id}'
         data = self.ajax_data(url)
         out = data['data']
-        if isinstance(out,list):
-            out = dict()
+        # empty output
+        if isinstance(out,list) and len(out)==0:
+            out = dict(id=self.link_id)
         return out
     
     def upvotes(self):
