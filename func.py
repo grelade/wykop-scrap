@@ -2,6 +2,7 @@ from requests import get,post
 import time
 import json
 import pandas as pd
+import random
 
 from bs4 import BeautifulSoup
 import numpy as np
@@ -303,9 +304,8 @@ def link_ids_to_data(link_ids: list,
     
     if output_df:
         df = pd.DataFrame(data)
-        if 'author' in df.keys():
-            df['author'] = df['author'].apply(lambda x: x['login'])
-
+        # if 'author' in df.keys():
+        #     df['author'] = df['author'].apply(lambda x: x['login'])
         return df
     else:
         return data
@@ -666,8 +666,9 @@ def fig_to_plotly_js(fig,output_file='output.html'):
     generate plotly figure in html format read to use on the web
     '''
     plot_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    r = random.randint(1,2**20)
     
-    template = u"""<div id="plotly-fig"></div><script src="https://cdn.plot.ly/plotly-latest.min.js"></script><script>var graph = {{plot_json}};Plotly.plot('plotly-fig', graph, {});</script>"""
+    template = u"""<div id="plotly-fig-NUMBER"></div><script src="https://cdn.plot.ly/plotly-latest.min.js"></script><script>var graph = {{plot_json}};Plotly.plot('plotly-fig-NUMBER', graph, {});</script>""".replace('NUMBER',str(r))
     data = {"plot_json": plot_json}
     j2_template = Template(template)
     
