@@ -3,119 +3,14 @@ import time
 import json
 import pandas as pd
 import random
-
+import ast
+import os
 from bs4 import BeautifulSoup
 import numpy as np
 from datetime import datetime
 from tqdm import tqdm
-        
 from jinja2 import Template
 import plotly
-
-def flag_404(response,html_soup):
-    # examples
-    # i = 17
-    # i = 22
-    return response.status_code == 404
-
-def flag_mainpage(response,html_soup):
-    # examples
-    # i = 6716548
-    return html_soup.find('html').title.text == 'Wykop.pl - newsy, aktualności, gry, wiadomości, muzyka, ciekawostki, filmiki'
-
-def flag_archive(response,html_soup):
-    # examples
-    # i = 44676
-    if block := html_soup.find(class_='annotation type-light-success space clearfix'):
-        return 'Przeglądasz archiwalną wersję znaleziska.' in block.text
-    else:
-        return False
-
-def flag_zakopane(response,html_soup):
-    # examples
-    # i = 6716527
-    # i = 6621541
-    if block := html_soup.find(class_='annotation type-light-silver space clearfix'):
-        return 'Znalezisko zostało zakopane. Głosowanie na treść nie jest już możliwe.' in block.text
-    else:
-        return False
-
-def flag_duplicate(response,html_soup):
-    # examples 
-    # i = 5901753
-    if block := html_soup.find(class_='annotation type-light-red space clearfix'):
-        return 'Duplikat:' in block.text
-    else:
-        return False
-    
-def flag_over18(response,html_soup):
-    # examples
-    # i = 5901773
-    # NOT IMPLEMENTED needs selenium...
-    return False
-
-def flag_deleted(response,html_soup):
-    # examples
-    # i = 6617345
-    if block := html_soup.find(class_='annotation type-light-red space clearfix'):
-        return 'Znalezisko usunięte' in block.text
-    else:
-        return False
-
-def flag_deleted_author(response,html_soup):
-    # examples
-    # i = 1718236
-    if block := html_soup.find(class_='annotation type-light-red space clearfix'):
-        return 'Treść usunięta na prośbę autora znaleziska' in block.text
-    else:
-        return False
-
-def flag_deleted_regulations(response,html_soup):
-    # examples
-    # i = 5686723
-    if block := html_soup.find(class_='annotation type-light-red space clearfix'):
-        return 'Naruszenie regulaminu - brak wiarygodnych źródeł informacji' in block.text
-    else:
-        return False
-
-def flag_manipulation(response,html_soup):
-    # examples
-    # i = 6349155
-    if block := html_soup.find(class_='annotation type-light-red space clearfix'):
-        return 'Manipulacja' in block.text
-    else:
-        return False
-    
-def flags(news_response,html_soup):
-    f_404 = flag_404(news_response,html_soup)
-    f_mainpage = flag_mainpage(news_response,html_soup)
-    f_deleted = flag_deleted(news_response,html_soup)
-    f_deleted_author = flag_deleted_author(news_response,html_soup)
-    f_deleted_regulations = flag_deleted_regulations(news_response,html_soup)
-    f_archive = flag_archive(news_response,html_soup)
-    f_zakopane = flag_zakopane(news_response,html_soup)
-    f_duplicate = flag_duplicate(news_response,html_soup)
-    f_manipulation = flag_manipulation(news_response,html_soup)
-    f_over18 = flag_over18(news_response,html_soup)
-    
-    return f_404,f_mainpage,f_deleted,f_deleted_author,f_deleted_regulations,f_archive,f_zakopane,f_duplicate,f_manipulation,f_over18
-
-def flags_code(*flags):
-    s = ''
-    for flag in flags:
-        s+=str(1*flag)
-    # s = s[::-1]
-    return s
-
-def flags_decode(s):
-    # out = out[::-1]
-    flags = []
-    for ss in s:
-        flags += [bool(int(ss))]
-    return flags
-
-
-
 
 
 def get_decorated(url,timeout: int = 240):
@@ -477,7 +372,7 @@ class tag_wykop(base_wykop):
                 if p<=pages:
                     break
                 p+=1
-            
+
         # trim extra link_ids
         i=0
         for i,link_id in enumerate(link_ids[::-1]):
@@ -485,8 +380,19 @@ class tag_wykop(base_wykop):
             if start_date <= datetime.fromisoformat(o['date']): 
                 break
 
-        link_ids = link_ids[:-i] if i>0 else link_ids
+        if i > 0 and i < len(link_ids)-1:
+            # print('between')
+            link_ids = link_ids[:-(i)]
+        elif i == len(link_ids)-1:
+            # print('max limit')
+            link_ids = []
+        elif i == 0:
+            # print('min limit')
+            link_ids = link_ids
+                
+        # link_ids = link_ids[:-(i+1)] if i>0 else link_ids
         
+
         #convert to data
         if conv_to_data:
             out = link_ids_to_data(link_ids)
@@ -554,15 +460,26 @@ class tag_wykop(base_wykop):
                 if p<=pages:
                     break
                 p+=1
-            
+
         # trim extra link_ids
         i=0
         for i,link_id in enumerate(link_ids[::-1]):
             o = link_wykop(link_id).basic_data()
             if start_date <= datetime.fromisoformat(o['date']): 
                 break
+                
+        if i > 0 and i < len(link_ids)-1:
+            # print('between')
+            link_ids = link_ids[:-(i)]
+        elif i == len(link_ids)-1:
+            # print('max limit')
+            link_ids = []
+        elif i == 0:
+            # print('min limit')
+            link_ids = link_ids
+            
+        # link_ids = link_ids[:-(i)] if i>0 else link_ids
 
-        link_ids = link_ids[:-i] if i>0 else link_ids
         
         #convert to data
         if conv_to_data:
@@ -578,31 +495,6 @@ class tag_wykop(base_wykop):
             return out2
         else:
             return link_ids        
-        
-#     def all_link_ids(self,
-#                         pages: int,
-#                         conv_to_data: bool = True):
-
-#         first_id = 1
-#         link_ids = []
-#         for p in range(pages):
-#             # print(first_id)
-#             url = f'https://www.wykop.pl/ajax2/tag/znaleziska/{self.tag}/wszystkie/next/link-{first_id}/'
-#             response = self._get_decorated_func()(url)
-#             out = json.loads(response.text[8:])
-#             out2 = out['operations'][0]['data']
-#             html_soup = BeautifulSoup(out2, 'html.parser')
-#             out3 = html_soup.find_all(class_="media-content m-reset-float")
-#             delta_ids = [int(o.a['href'].split('/')[-3]) for o in out3]
-            
-#             first_id = delta_ids[-1]
-            
-#             link_ids+=delta_ids 
-        
-#         if conv_to_data:
-#             return 
-#         else:
-#             return link_ids
     
     def best_entry_ids(self,
                        pages: int):
@@ -626,10 +518,14 @@ class mikroblog_wykop(base_wykop):
 
         
 
+        
 class file:
         
     def read_link_ids(ixs_file):
         return np.loadtxt(ixs_file,dtype=int,ndmin=1)
+    
+    def load_link_ids(*args,**kwargs):
+        return file.read_link_ids(*args,**kwargs)
 
     def save_link_ids(ixs,ixs_file):
         np.savetxt(ixs_file,ixs,fmt='%d')
@@ -637,17 +533,26 @@ class file:
     def read_links(links_file):
         return pd.read_csv(links_file,index_col=0)
 
+    def load_links(*args,**kwargs):
+        return file.read_links(*args,**kwargs)
+    
     def save_links(df,links_file):
         df.to_csv(links_file)
 
     def read_user(user_file):
         pass
 
+    def load_user(*args,**kwargs):
+        return file.read_user(*args,**kwargs)
+    
     def save_user(df,user_file):
         df.to_csv(user_file)
 
     def read_votes(votes_file):
         return pd.read_csv(votes_file,index_col=0)
+    
+    def load_votes(*args,**kwargs):
+        return file.read_votes(*args,**kwargs)
     
     def save_votes(df,votes_file):
         df.to_csv(votes_file)
@@ -655,11 +560,15 @@ class file:
     def read_tags(tags_file):
         return np.loadtxt(tags_file,dtype=str,ndmin=1)
     
+    def load_tags(*args,**kwargs):
+        return file.read_tags(*args,**kwargs)
+    
     def save_tags(tags,tags_file):
         np.savetxt(tags_file,tags,fmt='%s')
         
-        
-
+# aliases
+file_handler = file  
+fh = file
 
 def fig_to_plotly_js(fig,output_file='output.html'):
     '''
@@ -676,3 +585,188 @@ def fig_to_plotly_js(fig,output_file='output.html'):
     
     with open(output_file,'w') as f:
         f.write(out)
+        
+
+
+class links_data_cleaner:
+    
+    COLUMNS = ['id', 'title', 'description', 'tags', 'source_url', 'vote_count','bury_count', 'comments_count', 'related_count', 'date', 'author','preview', 'plus18', 'status', 'can_vote', 'is_hot', 'app', 'info']
+    NULL_VALUES = {'id': -1,
+                   'title': '',
+                   'description':'',
+                   'tags':'',
+                   'source_url':'',
+                   'vote_count':0,
+                   'bury_count':0,
+                   'comments_count':0,
+                   'related_count':0,
+                   'date':'',
+                   'author': '',
+                   'preview': '',
+                   'plus18': '',
+                   'status': '',
+                   'can_vote': '',
+                   'is_hot': '',
+                   'app': '',
+                   'info': '{}'}
+    
+    def __init__(self,
+                 links_file: str,
+                 data_path: str = 'data') -> None:
+        
+        self.links_file = links_file
+        self.data_path = data_path
+        self.links_file_path = os.path.join(data_path,links_file)
+        # self.report = None
+        
+        if not os.path.exists(self.links_file_path):
+            print('warning: link file does not exist!')
+        
+    def load_links(self) -> None:
+        
+        self.df = fh.load_links(self.links_file_path)
+
+    def save_links(self,
+                   links_file: str = '',
+                   overwrite: bool = False) -> None:
+        
+        f = self.links_file_path if links_file == '' else links_file
+        f_exists = os.path.exists(f)
+        if not f_exists or overwrite:
+            print(f'saving links to {f}')
+            fh.save_links(self.df, f)
+        else:
+            print(f'file {f} exists, skipping.')
+
+    def adjust_columns(self) -> None:
+        '''
+        ensure .link file has correct columns
+        '''
+        print('============ running adjust_columns() ============')
+        print(f'input df.shape = {self.df.shape}')
+        i = 0
+        if self.df.shape[1] != len(links_data_cleaner.COLUMNS):
+            for col in links_data_cleaner.COLUMNS:
+                if col not in self.df.columns:
+                    self.df[col] = links_data_cleaner.NULL_VALUES[col]
+                    
+        print(f'output df.shape = {self.df.shape}')
+        
+    def clean_nans(self) -> None:
+        '''
+        fill nan fields with non-nan values
+        and
+        remove nan records from .link
+        '''
+        print('============ running clean_nans() ============')
+        print(f'input df.shape = {self.df.shape}')
+        def clean(col):
+            if col in self.df.keys():
+                self.df[col] = self.df[col].fillna(links_data_cleaner.NULL_VALUES[col]) 
+        
+        # empty record has only nans and an id
+        empty_rec_mask = (self.df.iloc[::,1:].isna().sum(axis=1)==(self.df.shape[1]-1))
+        self.df = self.df[~empty_rec_mask]
+        
+        for col in links_data_cleaner.COLUMNS:
+            clean(col)
+        
+        self.df = self.df.dropna()
+        print(f'output df.shape = {self.df.shape}')
+        
+    def clean_author_column(self) -> None:
+        '''
+        ensure author column is not a dict
+        '''
+        print('============ running clean_author_column() ============')
+        def conv_dict(s):
+            return ast.literal_eval(s) if s[0]=='{' and s[-1]=='}' else s
+            
+        # print(f'input df.shape = {self.df.shape}')
+        
+        newauthor = []
+        for author in self.df['author']:
+            out = ''
+            try:
+                out = conv_dict(author)
+                if isinstance(out,dict) and 'login' in out.keys():
+                    out = out['login']
+                    
+            except ValueError as err:
+                out = author
+                print(f'ValueError: {err} for ast.literal_eval({author})')
+                
+            except SyntaxError as err:
+                out = author
+                print(f'SyntaxError: {err} for ast.literal_eval({author})')
+
+            finally:
+                newauthor += [out]
+
+        self.df['author'] = newauthor
+        # print(f'output df.shape = {self.df.shape}')
+        
+    def trim_dates(self,
+                   start_date : str = '',
+                   end_date : str = '') -> None:
+        '''
+        trim record to start and end dates
+        '''
+        print('============ running trim_dates() ============')
+        print(f'input df.shape = {self.df.shape}')
+        
+        n,e = os.path.splitext(self.links_file)
+
+        # n.split('_') -> ['best', 'f1', '2022-01-01', '2022-07-12']
+        _,_,start_date0,end_date0 = n.split('_')
+
+        if start_date != '':
+            start_date0 = start_date
+        if end_date != '':
+            end_date0 = end_date
+        
+        start_date = datetime.fromisoformat(start_date0)
+        end_date = datetime.fromisoformat(end_date0)
+
+        dates = self.df['date'].map(datetime.fromisoformat)
+        mask = (dates >= start_date) & (dates <= end_date)
+
+        self.df = self.df[mask]
+        print(f'output df.shape = {self.df.shape}')
+        
+    def get_adjusted_link_ids(self) -> np.array:
+        '''
+        create .id file adjusted to the .link file
+        '''
+        
+        link_ids_from_df = self.df['id'].to_numpy()
+        link_ids_from_df = np.sort(link_ids_from_df)[::-1]
+               
+        return link_ids_from_df
+         
+    def save_adjusted_link_ids(self,
+                               ixs_file: str = '',
+                               overwrite: bool = False):
+        
+        print('============ running save_adjusted_link_ids() ============')
+        n,e = os.path.splitext(self.links_file)
+        fid = n+'.id'
+        fidpath = os.path.join(self.data_path,fid)
+        if os.path.exists(fidpath):
+            link_ids = fh.load_link_ids(fidpath) 
+            print(f'len(link_ids) = {len(link_ids)}')
+        else:
+            print(f'base link_ids file is missing!')
+        
+        link_ids_from_df = self.get_adjusted_link_ids()
+        
+        print(f'adjusted len(link_ids) = {len(link_ids_from_df)}') 
+        
+        f = fidpath if ixs_file == '' else ixs_file
+        f_exists = os.path.exists(f)
+        if not f_exists or overwrite:
+            print(f'saving link_ids to {f}')
+            fh.save_link_ids(link_ids_from_df, f)
+        else:
+            print(f'file {f} exists, skipping.')
+        
