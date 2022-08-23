@@ -17,13 +17,18 @@ if __name__ == "__main__":
     print(f'\n======= {os.path.basename(__file__)} =======\n')
     
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                     description='Script for ')
+                                     description='Script for subtracting two link files. Used to divide the best links from the remaining ones.')
     
-    parser.add_argument('--links_file',required=True,default='',type=str)
-    parser.add_argument('--links_file_diff',required=True,default='',type=str)
-    parser.add_argument('--links_file_new',default='',type=str)    
-    parser.add_argument('--overwrite',action="store_true")
-    parser.add_argument('--update_ixs',action="store_true")
+    parser.add_argument('--links_file',required=True,default='',type=str,
+                        help='source links file; typically scraped in "all" mode (REQUIRED)')
+    parser.add_argument('--links_file_diff',required=True,default='',type=str,
+                        help='diff links file; typically scraped in "best" mode (REQUIRED)')
+    parser.add_argument('--links_file_new',default='',type=str,
+                        help='new link file after subtraction; if empty, use the LINKS_FILE')
+    parser.add_argument('--overwrite',action="store_true",
+                        help='overwrite existing files')
+    parser.add_argument('--update_ixs',action="store_true",
+                        help='update the .id files with matching names')
 
     args = parser.parse_args()
     links_file = args.links_file
