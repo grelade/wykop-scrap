@@ -118,6 +118,18 @@ After the scraping, we provide scripts which either clean or otherwise transform
   python transform_clean_links_link_ids.py --data_mode best --data_dir datadir --new_data_dir newdir
   ```
   
-  
-- (**```transform_diff_links.py```**)
+- (**```transform_diff_links.py```**) - script for subtracting two link files. Used to divide the best links from the remaining ones.
 
+  **Available options**:
+  ```
+  --links_file LINKS_FILE           source links file; typically scraped in "all" mode (REQUIRED)
+  --links_file_diff LINKS_FILE_DIFF diff links file; typically scraped in "best" mode (REQUIRED)
+  --links_file_new LINKS_FILE_NEW   new link file after subtraction; if empty, use the LINKS_FILE
+  --overwrite                       overwrite existing files
+  --update_ixs                      update the .id files with matching names
+  ```
+  
+  **Example usage**:
+  ```
+  python transform_diff_links.py --links_file all_wydarzenia_2022-07-01_2022-08-01.link --lins_file_diff best_wydarzenia_2022-07-01_2022-08-01.link
+  ```
