@@ -617,6 +617,7 @@ class links_data_cleaner:
         self.links_file = links_file
         self.data_path = data_path
         self.links_file_path = os.path.join(data_path,links_file)
+        
         # self.report = None
         
         if not os.path.exists(self.links_file_path):
@@ -648,7 +649,8 @@ class links_data_cleaner:
         if self.df.shape[1] != len(links_data_cleaner.COLUMNS):
             for col in links_data_cleaner.COLUMNS:
                 if col not in self.df.columns:
-                    self.df[col] = links_data_cleaner.NULL_VALUES[col]
+                    # self.df[col] = links_data_cleaner.NULL_VALUES[col]
+                    self.df[col] = np.nan
                     
         print(f'output df.shape = {self.df.shape}')
         
@@ -663,6 +665,7 @@ class links_data_cleaner:
         def clean(col):
             if col in self.df.keys():
                 self.df[col] = self.df[col].fillna(links_data_cleaner.NULL_VALUES[col]) 
+        
         
         # empty record has only nans and an id
         empty_rec_mask = (self.df.iloc[::,1:].isna().sum(axis=1)==(self.df.shape[1]-1))
@@ -680,7 +683,13 @@ class links_data_cleaner:
         '''
         print('============ running clean_author_column() ============')
         def conv_dict(s):
-            return ast.literal_eval(s) if s[0]=='{' and s[-1]=='}' else s
+            if len(s)==0:
+                return s
+            else:
+                if s[0]=='{' and s[-1]=='}':
+                    return ast.literal_eval(s)
+                
+            return s
             
         # print(f'input df.shape = {self.df.shape}')
         
