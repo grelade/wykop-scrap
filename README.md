@@ -8,22 +8,27 @@ Scraping scripts for <a href="http://wykop.pl">wykop.pl</a> website. Using Beati
 
 # scraping scripts
 
-Scraping scripts are collected under the scrap prefix ```scrap_*.py```. Overall strategy is to gather information around tags.
+Scraping scripts are collected under the scrap prefix ```scrap_*.py```. Overall strategy is to gather information around tags. 
 
-- ```scrap_top_tags.py``` - scrapes the top tags from <a href="https://www.wykop.pl/tagi">https://www.wykop.pl/tagi</a>.
 
+- (**```scrap_top_tags.py```**) - scrapes the top tags from <a href="https://www.wykop.pl/tagi">https://www.wykop.pl/tagi</a>.
+  
+  **Available options**:
   ```
   --tags_file TAGS_FILE   txt file with tags (REQUIRED)
   --timeout TIMEOUT       connection limit timeout
   --overwrite             overwrite existing files
   ```
-  **example usage**:
+  **Example usage**:
   ```
   python scrap_top_tags.py --tags_file top_tags.txt
   ```
+  which creates a text file top_tags.txt.
 
-- ```scrap_link_ids.py``` - scrapes link indices for a single tag within time interval. Outputs an *.id file.
 
+- (**```scrap_tags_to_link_ids.py```**) - scrapes link indices for a single tag within time interval. Outputs an .id file. 
+  
+  **Available options**:
   ```
     --ixs_file IXS_FILE     file with link indices; 
                             if not given, a default format [MODE]_[TAG]_[START_DATE]_[END_DATE].id is used
@@ -36,10 +41,59 @@ Scraping scripts are collected under the scrap prefix ```scrap_*.py```. Overall 
     --timeout TIMEOUT       connection limit timeout
     --overwrite             overwrite existing files
   ```
-  **example usage**:
+  **Example usage**:
   ```
-  python scrap_link_ids.py --data_dir datadir --start_date 2022-07-01 --end_date 2022-08-01 --tag wydarzenia
+  python scrap_tags_to_link_ids.py --data_dir datadir --start_date 2022-07-01 --end_date 2022-08-01 --tag wydarzenia
   ```
   which creates a file with link indices in *datadir/best_wydarzenia_2022-07-01_2022-08-01.id*.
   
-  - 
+  
+- (**```scrap_link_ids_to_links.py```**) - scrapes detailed data on links from a link id .id file. Outputs a .link file.
+  
+  **Available options**:
+  ```
+  --ixs_file IXS_FILE     file with link indices (REQUIRED)
+  --links_file LINKS_FILE file with detailed data on links in a csv format;
+                          if not given, default name is the IXS_FILE with .link extension.
+  --timeout TIMEOUT       connection limit timeout
+  --overwrite             overwrite existing files
+  ```
+  **Example usage**:
+  ```
+  python scrap_link_ids_to_links.py --ixs_file datadir/best_wydarzenia_2022-07-01_2022-08-01.id
+  ```
+  which creates a csv file *datadir/best_wydarzenia_2022-07-01_2022-08-01.link* containing detailed data about the links in the IXS_FILE.
+  
+  
+- (**```scrap_link_ids_to_votes.py```**) - scrapes detailed data on voting on link id in an .id file. Outputs a .vote file.
+
+  **Available options**:
+  ```
+  --ixs_file IXS_FILE     file with link indices (REQUIRED)
+  --votes_file VOTES_FILE file with voting information in a csv format;
+                          if not given, default name is the IXS_FILE with .vote extension.
+  --timeout TIMEOUT       connection limit timeout
+  --overwrite             overwrite existing files 
+  ```
+  **Example usage**:
+  ```
+  python scrap_link_ids_to_votes.py --ixs_file datadir/best_wydarzenia_2022-07-01_2022-08-01.id
+  ```
+  which creates a csv file *datadir/best_wydarzenia_2022-07-01_2022-08-01.vote* containing detailed data about the votes given in links found in IXS_FILE.
+  
+  
+- (**```scrap_links_to_basic_userdata.py```**) - scrapes basic userdata of article authors found in a .link file. Outputs a .user file.
+
+  **Available options**:
+  ```
+  --links_file LINKS_FILE file with link details (REQUIRED)
+  --user_file USER_FILE   file with basic user data in a csv format;
+                          if not given, default name is the LINKS_FILE with .user extension.
+  --timeout TIMEOUT       connection limit timeout
+  --overwrite             overwrite existing files
+  ```
+  **Example usage**:
+  ```
+  python scrap_links_to_basic_userdata.py --links_file datadir/best_wydarzenia_2022-07-01_2022-08-01.link
+  ```
+  which creates a csv file *datadir/best_wydarzenia_2022-07-01_2022-08-01.user* containing basic userdata about authors found in links LINKS_FILE.
