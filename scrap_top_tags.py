@@ -18,10 +18,15 @@ if __name__ == "__main__":
     
     print(f'\n======= {os.path.basename(__file__)} =======\n')
     
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--tags_file',type=str,required=True)
-    parser.add_argument('--timeout',default=240,type=int)
-    parser.add_argument('--overwrite',action="store_true")
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                     description='Script for scraping the top tags from https://www.wykop.pl/tagi')
+    
+    parser.add_argument('--tags_file',type=str,default='',required=True,
+                        help='txt file with tags (REQUIRED)')
+    parser.add_argument('--timeout',default=240,type=int,
+                        help='connection limit timeout')
+    parser.add_argument('--overwrite',action="store_true",
+                        help='overwrite existing files')
     
     args = parser.parse_args()
     tags_file = args.tags_file
@@ -35,7 +40,7 @@ if __name__ == "__main__":
         
         file.save_tags([],tags_file)
         
-        w = list_wykop()
+        w = list_wykop(timeout=timeout)
         tags = w.top_tags()
         
         print(f'... found {len(tags)} tags.')

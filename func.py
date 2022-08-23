@@ -318,27 +318,41 @@ class tag_wykop(base_wykop):
         super(tag_wykop,self).__init__(*args,**kwargs) 
         self.tag = tag.lower()
     
-    
-    
-    def best_link_ids(self,
-                      start_date: str,
-                      mode: str='start_date', # or pages
-                      pages: int = 0,
-                      conv_to_data: bool = True):
+    def link_ids(self,
+                 start_date : str,
+                 end_date : str = '',
+                 mode : str = 'best',
+                 scrap_type : str = 'dates',
+                 pages : int = 0,
+                 conv_to_data : bool = False):
+                
+        if mode not in ['best','all']:
+            raise Error(f'unknown mode={mode}')
+        else:
+            mode_dict = {'best': 'najlepsze',
+                         'all': 'wszystkie'}
+            mode_link = mode_dict[mode]
+
+        if scrap_type not in ['pages','dates']:
+            raise Error(f'unknown scrap_type={scrap_type}')
 
         first_id = 1
         link_ids = []
         
-        if mode == 'start_date':
+        if scrap_type == 'dates':
             start_date = datetime.fromisoformat(start_date)
-        elif mode == 'pages':
-            p = 0
+            end_date = datetime.fromisoformat(end_date)
+            
+        elif scrap_type == 'pages':
+            p = 1
         
-        stop = False
-        while not stop:
+        # return 0
+    
+        # stop = False
+        while True:
             
             # print(first_id)
-            url = f'https://www.wykop.pl/ajax2/tag/znaleziska/{self.tag}/najlepsze/next/link-{first_id}/'
+            url = f'https://www.wykop.pl/ajax2/tag/znaleziska/{self.tag}/{mode_link}/next/link-{first_id}/'
             response = self._get_decorated_func()(url)
             r = response.text[8:]
             if r == '':
@@ -364,137 +378,50 @@ class tag_wykop(base_wykop):
             first_id = delta_ids[-1]
             link_ids += delta_ids
 
-            if mode == 'start_date':
+            if scrap_type == 'dates':
                 curr_date = datetime.fromisoformat(link_wykop(first_id).basic_data()['date'])
                 if start_date > curr_date:
                     break
-            elif mode == 'pages':
-                if p<=pages:
+            elif scrap_type == 'pages':
+                if p>=pages:
                     break
                 p+=1
-
-        # trim extra link_ids
-        i=0
-        for i,link_id in enumerate(link_ids[::-1]):
-            o = link_wykop(link_id).basic_data()
-            if start_date <= datetime.fromisoformat(o['date']): 
-                break
-
-        if i > 0 and i < len(link_ids)-1:
-            # print('between')
-            link_ids = link_ids[:-(i)]
-        elif i == len(link_ids)-1:
-            # print('max limit')
-            link_ids = []
-        elif i == 0:
-            # print('min limit')
-            link_ids = link_ids
-                
-        # link_ids = link_ids[:-(i+1)] if i>0 else link_ids
         
+        if scrap_type == 'dates':
+            
+            mask = [True]*len(link_ids)
+
+            # trim extra link_ids up to start_date
+            for i in range(len(mask)-1,-1,-1):
+                # print(i)
+                link_id = link_ids[i]
+                o = link_wykop(link_id).basic_data()
+                curr_date = datetime.fromisoformat(o['date'])
+
+                if start_date<=curr_date:
+                    break
+                else:
+                    mask[i] = False
+
+            # trim extra link_ids up to end_date
+            for i in range(len(mask)):
+                # print(i)
+                link_id = link_ids[i]
+                o = link_wykop(link_id).basic_data()
+                curr_date = datetime.fromisoformat(o['date'])
+
+                if end_date>=curr_date:
+                    break
+                else:
+                    mask[i] = False 
+
+            link_ids = list(np.array(link_ids)[mask])
 
         #convert to data
         if conv_to_data:
-            out = link_ids_to_data(link_ids)
-            out2 = []
-            
-            for o in out:
-                if start_date <= datetime.fromisoformat(o['date']): 
-                    out2 += [o]
-                # else:
-                #     break
-            
-            return out2
+            return link_ids_to_data(link_ids)
         else:
             return link_ids
-
-    def all_link_ids(self,
-                     start_date: str,
-                     mode: str='start_date', # or pages
-                     pages: int = 0,
-                     conv_to_data: bool = True):
-
-        first_id = 1
-        link_ids = []
-        
-        if mode == 'start_date':
-            start_date = datetime.fromisoformat(start_date)
-        elif mode == 'pages':
-            p = 0
-        
-        stop = False
-        while not stop:
-            
-            # print(first_id)
-            url = f'https://www.wykop.pl/ajax2/tag/znaleziska/{self.tag}/wszystkie/next/link-{first_id}/'
-            response = self._get_decorated_func()(url)
-            r = response.text[8:]
-            if r == '':
-                # no link_ids found
-                link_ids = []
-                break 
-            out = json.loads(r)
-            out2 = out['operations'][0]['data']
-            html_soup = BeautifulSoup(out2, 'html.parser')
-            out3 = html_soup.find_all(class_="media-content m-reset-float")
-            out3 = [o.a['href'] for o in out3]
-            
-            out4 = []
-            for o in out3:
-                if o != 'https://www.wykop.pl/rejestracja/':
-                    out4 += [o]
-            
-            delta_ids = [int(o.split('/')[-3]) for o in out4]
-
-            if len(delta_ids)==0:
-                break
-            
-            first_id = delta_ids[-1]
-            link_ids += delta_ids
-
-            if mode == 'start_date':
-                curr_date = datetime.fromisoformat(link_wykop(first_id).basic_data()['date'])
-                if start_date > curr_date:
-                    break
-            elif mode == 'pages':
-                if p<=pages:
-                    break
-                p+=1
-
-        # trim extra link_ids
-        i=0
-        for i,link_id in enumerate(link_ids[::-1]):
-            o = link_wykop(link_id).basic_data()
-            if start_date <= datetime.fromisoformat(o['date']): 
-                break
-                
-        if i > 0 and i < len(link_ids)-1:
-            # print('between')
-            link_ids = link_ids[:-(i)]
-        elif i == len(link_ids)-1:
-            # print('max limit')
-            link_ids = []
-        elif i == 0:
-            # print('min limit')
-            link_ids = link_ids
-            
-        # link_ids = link_ids[:-(i)] if i>0 else link_ids
-
-        
-        #convert to data
-        if conv_to_data:
-            out = link_ids_to_data(link_ids)
-            out2 = []
-            
-            for o in out:
-                if start_date <= datetime.fromisoformat(o['date']): 
-                    out2 += [o]
-                # else:
-                #     break
-            
-            return out2
-        else:
-            return link_ids        
     
     def best_entry_ids(self,
                        pages: int):
@@ -504,9 +431,7 @@ class tag_wykop(base_wykop):
     def recent_entry_ids(self,
                          pages: int):
         print('not implemented')
-        return None    
-    
-    
+        return None
     
 class mikroblog_wykop(base_wykop):
     

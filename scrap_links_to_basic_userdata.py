@@ -18,11 +18,17 @@ if __name__ == "__main__":
 
     print(f'\n======= {os.path.basename(__file__)} =======\n')
     
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--links_file',type=str,required=True)
-    parser.add_argument('--user_file',default='',type=str)
-    parser.add_argument('--timeout',default=240,type=int)
-    parser.add_argument('--overwrite',action="store_true")
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                     description='Script for scraping basic userdata of article authors found in a .link file. Outputs a .user file.')
+    
+    parser.add_argument('--links_file',type=str,default='',required=True,
+                        help='file with link details (REQUIRED)')
+    parser.add_argument('--user_file',default='',type=str,
+                        help='file with basic user data in a csv format; if not given, default name is the LINKS_FILE with .user extension.')
+    parser.add_argument('--timeout',default=240,type=int,
+                        help='connection limit timeout')
+    parser.add_argument('--overwrite',action="store_true",
+                        help='overwrite existing files')
     
     args = parser.parse_args()
     links_file = args.links_file

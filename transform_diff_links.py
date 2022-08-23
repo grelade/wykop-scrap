@@ -16,9 +16,11 @@ if __name__ == "__main__":
     
     print(f'\n======= {os.path.basename(__file__)} =======\n')
     
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--links_file',required=True,type=str)
-    parser.add_argument('--links_file_diff',required=True,type=str)
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                     description='Script for ')
+    
+    parser.add_argument('--links_file',required=True,default='',type=str)
+    parser.add_argument('--links_file_diff',required=True,default='',type=str)
     parser.add_argument('--links_file_new',default='',type=str)    
     parser.add_argument('--overwrite',action="store_true")
     parser.add_argument('--update_ixs',action="store_true")

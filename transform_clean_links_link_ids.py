@@ -15,23 +15,34 @@ if __name__ == "__main__":
     
     print(f'\n======= {os.path.basename(__file__)} =======\n')
     
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--data_class',default='links',type=str)
-    parser.add_argument('--data_key',default='best',type=str)
-    parser.add_argument('--data_path',default='data',type=str)
-    parser.add_argument('--manual_mode',action="store_true")
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                     description='Script for cleaning links and link_ids data. Scans the DATA_DIR directory; takes all .link and their corresponding .id files matching the DATA_MODE and cleans them. Afterwards, it saves them in the NEW_DATA_DIR.')
+    
+    # parser.add_argument('--data_class',default='links',type=str)
+    parser.add_argument('--data_mode',default='best',type=str,choices=['best','all'],
+                        help='which mode (best or all) to clean')
+    parser.add_argument('--data_dir',default='data',type=str,
+                        help='data directory')
+    parser.add_argument('--new_data_dir',default='',type=str,
+                        help='new data directory (cleaned); if not given, uses DATA_DIR')
+    parser.add_argument('--manual_mode',action="store_true",
+                        help='use manual mode')
     # parser.add_argument('--overwrite',action="store_true")
     
     args = parser.parse_args()
-    data_class = args.data_class
-    data_key = args.data_key
-    data_path = args.data_path
+    # data_class = args.data_class
+    data_class = 'links'
+    data_mode = args.data_mode
+    data_dir = args.data_dir
+    new_data_dir = args.new_data_dir
     manual_mode = args.manual_mode
     # overwrite = args.overwrite
     
+    if new_data_dir == '':
+        new_data_dir = data_dir
     
     # generate files dict
-    files = os.listdir(data_path)
+    files = os.listdir(data_dir)
     files = sorted(files)
     keys = ['best','all']
 
@@ -85,17 +96,22 @@ if __name__ == "__main__":
     
     stop = True
         
-    for f in dict_files[data_class][data_key]:
+    for f in dict_files[data_class][data_mode]:
         print('#'*20)
         print(f'file = {f}')
-        ldc = links_data_cleaner(links_file = f,data_path=data_path)
+        
+        ldc = links_data_cleaner(links_file = f,data_path=data_dir)
         ldc.load_links()
         ldc.adjust_columns()
         ldc.clean_nans()
         ldc.clean_author_column()
         ldc.trim_dates()
-        ldc.save_links(overwrite=True)
-        ldc.save_adjusted_link_ids(overwrite=True)
+        
+        links_file_path = os.path.join(new_data_dir,f)
+        ldc.save_links(links_file=links_file_path,overwrite=True)
+
+        ixs_file = os.path.splitext(links_file_path)[0]+'.id'
+        ldc.save_adjusted_link_ids(ixs_file=ixs_file,overwrite=True)
 
         if manual_mode:
             if stop:

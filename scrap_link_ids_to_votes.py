@@ -18,11 +18,16 @@ if __name__ == "__main__":
 
     print(f'\n======= {os.path.basename(__file__)} =======\n')
     
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--ixs_file',type=str, required=True)
-    parser.add_argument('--votes_file',default='',type=str)
-    parser.add_argument('--timeout',default=240,type=int)
-    parser.add_argument('--overwrite',action="store_true")
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                     description='Script for scraping detailed data on voting on link id in an .id file. Outputs a .vote file.')
+    
+    parser.add_argument('--ixs_file',type=str,default='',required=True,
+                        help='file with link indices (REQUIRED)')
+    parser.add_argument('--votes_file',default='',type=str,help='file with voting information in a csv format; if not given, default name is the IXS_FILE with .vote extension.')
+    parser.add_argument('--timeout',default=240,type=int,
+                        help='connection limit timeout')
+    parser.add_argument('--overwrite',action="store_true",
+                        help='overwrite existing files')
     
     args = parser.parse_args()
     ixs_file = args.ixs_file
