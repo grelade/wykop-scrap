@@ -9,7 +9,7 @@ Scraping scripts for <a href="http://wykop.pl">wykop.pl</a> website. Using Beati
 
 # scraping scripts
 
-Scraping scripts are collected under the scrap prefix ```scrap_*.py```. Overall strategy is to gather information around tags. 
+Scraping scripts are collected under the prefix ```scrap_*.py```. Overall strategy is to gather information around tags. 
 
 
 - (**```scrap_top_tags.py```**) - scrapes the top tags from <a href="https://www.wykop.pl/tagi">https://www.wykop.pl/tagi</a>.
@@ -101,7 +101,7 @@ Scraping scripts are collected under the scrap prefix ```scrap_*.py```. Overall 
 
 # transform scripts
 
-After the scraping, we provide scripts which either clean or otherwise transform the scraped data into single format, unifies the missing records etc.
+After the scraping, we provide scripts (collected under the prefix ```transform_*.py```) which either clean or otherwise transform the scraped data into single format, unifies the missing records etc.
 
 - (**```transform_clean_links_link_ids.py```**) - script for cleaning links and link_ids data. Scans the DATA_DIR directory; takes all .link and their corresponding .id files matching the DATA_MODE and cleans them. Afterwards, it saves them in the NEW_DATA_DIR.
 
