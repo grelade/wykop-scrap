@@ -1,6 +1,7 @@
 # Contents
 * [what is it?](#what-is-it)
 * [scraping scripts](#scraping-scripts)
+* [transform scripts](#transform-scripts)
 
 # what is it?
 
@@ -97,3 +98,26 @@ Scraping scripts are collected under the scrap prefix ```scrap_*.py```. Overall 
   python scrap_links_to_basic_userdata.py --links_file datadir/best_wydarzenia_2022-07-01_2022-08-01.link
   ```
   which creates a csv file *datadir/best_wydarzenia_2022-07-01_2022-08-01.user* containing basic userdata about authors found in links LINKS_FILE.
+
+# transform scripts
+
+After the scraping, we provide scripts which either clean or otherwise transform the scraped data into single format, unifies the missing records etc.
+
+- (**```transform_clean_links_link_ids.py```**) - script for cleaning links and link_ids data. Scans the DATA_DIR directory; takes all .link and their corresponding .id files matching the DATA_MODE and cleans them. Afterwards, it saves them in the NEW_DATA_DIR.
+
+  **Available options**:
+  ```
+  --data_mode {best,all}      which mode (best or all) to clean
+  --data_dir DATA_DIR         data directory
+  --new_data_dir NEW_DATA_DIR new data directory (cleaned); if not given, uses DATA_DIR
+  --manual_mode               use manual mode
+  ```
+
+  **Example usage**:
+  ```
+  python transform_clean_links_link_ids.py --data_mode best --data_dir datadir --new_data_dir newdir
+  ```
+  
+  
+- (**```transform_diff_links.py```**)
+
