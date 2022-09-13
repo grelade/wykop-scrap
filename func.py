@@ -215,9 +215,10 @@ def link_ids_to_votes(link_ids: list,
     df = None
     
     for link_id in loop:
-
+        print(link_id)
         lw = link_wykop(link_id,timeout=timeout)
         out = lw.upvotes()
+        print(len(out))
         if len(out)>0:
             df_up = pd.DataFrame(out)
             
@@ -229,6 +230,7 @@ def link_ids_to_votes(link_ids: list,
             df_up = None
             
         out2 = lw.downvotes()
+        print(len(out2))
         if len(out2)>0:
             df_down = pd.DataFrame(out2)
 
@@ -238,7 +240,11 @@ def link_ids_to_votes(link_ids: list,
         else:
             df_down = None
             
-        delta_df = pd.concat((df_down,df_up),axis=0)
+        if df_down == None and df_up == None:
+            delta_df = None
+        else:
+            delta_df = pd.concat((df_down,df_up),axis=0)
+            
         df = delta_df if df is None else df.append(delta_df,ignore_index=True)
     
     if output_df:
