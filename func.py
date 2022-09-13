@@ -240,7 +240,7 @@ def link_ids_to_votes(link_ids: list,
         else:
             df_down = None
             
-        if df_down == None and df_up == None:
+        if df_down is None and df_up is None:
             delta_df = None
         else:
             delta_df = pd.concat((df_down,df_up),axis=0)
