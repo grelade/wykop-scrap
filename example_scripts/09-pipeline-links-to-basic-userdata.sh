@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DATADIR="datadir"
+DATADIR="data"
 # KEY=${1}
 
 FILES="${DATADIR}/*.link"

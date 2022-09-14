@@ -1,10 +1,11 @@
 #!/bin/bash
 
-datapath="data"
+DATADIR="data"
+TAGSFILE=${1}
 
 while read tag; do
 
-  FILES="${datapath}/*_${tag}_*.link"
+  FILES="${DATADIR}/*_${tag}_*.link"
   IXS_FILE=""
   IXS_FILE_DIFF=""
   
@@ -33,4 +34,4 @@ while read tag; do
   if [ "$IXS_FILE" != "" ] && [ "$IXS_FILE_DIFF" != "" ]; then
     python transform_diff_links.py --links_file $IXS_FILE --links_file_diff $IXS_FILE_DIFF --overwrite --update_ixs
   fi
-done < top_tags.txt
+done < $TAGSFILE

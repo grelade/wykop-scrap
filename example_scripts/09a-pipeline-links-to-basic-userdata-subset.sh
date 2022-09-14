@@ -7,7 +7,7 @@ TAGSFILE=$1
 # FILES="${DATADIR}/${KEY}_*.id"
 
 
-FILES="${DATADIR}/*.id"
+FILES="${DATADIR}/*.link"
 
 
 found=false
@@ -26,9 +26,9 @@ while read tag; do
   
   if [ "$found" = true ]; then
     echo $f
-    python scrap_link_ids_to_votes.py --ixs_file $f
+    python scrap_links_to_basic_userdata.py --links_file $f
   else
-    echo "no link_ids file found"
+    echo "no links file found"
     # FILE="${DATADIR}/${KEY}_${tag}_${STARTDATE}_${ENDDATE}.id"
     # eval $SCRIPT --start_date $STARTDATE --end_date $ENDDATE --tag $tag --ixs_file $FILE --mode $KEY
   fi

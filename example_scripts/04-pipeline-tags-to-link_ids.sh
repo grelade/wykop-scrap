@@ -1,13 +1,12 @@
 #!/bin/bash
 
-DATADIR="datadir"
-KEY=${1}
+DATADIR=${1}
+TAGSFILE=${2}
+KEY=${3}
 # cd data
 
-# STARTDATE="2022-01-01"
-# ENDDATE=$(date --iso-8601)
-STARTDATE="2022-07-01"
-ENDDATE="2022-08-01"
+STARTDATE=${4}
+ENDDATE=${5}
     
 FILES="${DATADIR}/${KEY}_*.id"
 # SCRIPT="python scrap_${KEY}_link_ids.py"
@@ -34,4 +33,4 @@ while read tag; do
     eval $SCRIPT --start_date $STARTDATE --end_date $ENDDATE --tag $tag --ixs_file $FILE --mode $KEY
   fi
   found=false
-done < top_tags.txt
+done < $TAGSFILE
