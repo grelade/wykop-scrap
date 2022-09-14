@@ -202,7 +202,7 @@ Since it is the labourious process, it has a safety feature which does not pursu
   ./example_scripts/07-pipeline-difference-links.sh top_tags.txt
   ```
 
-* **Gather votes for a subset of tags**. Loop over *tags_to_votes.txt* (TAGSFILE) and collect voting structure for each *.id* file in *data* (DATADIR) directory. Store everything in a *.vote* file.
+* **Gather voting structure**. Loop over *tags_to_votes.txt* (TAGSFILE) and collect voting structure for each *.id* file in *data* (DATADIR) directory. Store everything in a *.vote* file.
 
   **input**: *tags_to_votes.txt*, *data/\*.id*
   
@@ -212,7 +212,7 @@ Since it is the labourious process, it has a safety feature which does not pursu
   ./example_scripts/08a-pipeline-link_ids-to-votes-subset.sh tags_to_votes.txt
   ```
 
-* **Gather basic userdata for authors in a subset of tags**. Loop over *tags_to_users.txt* (TAGSFILE), collect basic user data of the authors found in each *data/\*.link* file. Store everything in *data* (DATADIR) directory in a corresponding *.user* file. 
+* **Gather basic userdata for authors**. Loop over *tags_to_users.txt* (TAGSFILE), collect basic user data of the authors found in each *data/\*.link* file. Store everything in *data* (DATADIR) directory in a corresponding *.user* file. 
 
   **input**: *tags_to_users.txt*, *data/\*.link*
   
