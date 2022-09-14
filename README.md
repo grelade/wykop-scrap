@@ -5,11 +5,11 @@
 
 # what is it?
 
-Scraping scripts for <a href="http://wykop.pl">wykop.pl</a> website. Using BeatifulSoup4.
+Scraping programs for <a href="http://wykop.pl">wykop.pl</a> website. Using BeatifulSoup4 and custom-made API.
 
-# scraping scripts
+# scraping programs
 
-Scraping scripts are collected under the prefix ```scrap_*.py```. Overall strategy is to gather information around tags. 
+Scraping programs are collected under the prefix ```scrap_*.py```. Overall strategy is to gather information around tags. 
 
 
 - (**```scrap_top_tags.py```**) - scrapes the top tags from <a href="https://www.wykop.pl/tagi">https://www.wykop.pl/tagi</a>.
@@ -104,7 +104,7 @@ Scraping scripts are collected under the prefix ```scrap_*.py```. Overall strate
   ```
   which creates a csv file *datadir/best_wydarzenia_2022-07-01_2022-08-01.user* containing basic userdata about authors found in links LINKS_FILE.
 
-# transform scripts
+# transform programs
 
 After the scraping, we provide scripts (collected under the prefix ```transform_*.py```) which either clean or otherwise transform the scraped data into single format, unifies the missing records etc.
 
@@ -141,3 +141,6 @@ After the scraping, we provide scripts (collected under the prefix ```transform_
   python transform_diff_links.py --links_file all_wydarzenia_2022-07-01_2022-08-01.link 
                                  --lins_file_diff best_wydarzenia_2022-07-01_2022-08-01.link
   ```
+
+
+# example scripts
