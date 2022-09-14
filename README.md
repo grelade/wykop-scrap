@@ -1,15 +1,16 @@
 # Contents
 * [what is it?](#what-is-it)
-* [scraping scripts](#scraping-scripts)
-* [transform scripts](#transform-scripts)
+* [scraping programs](#scraping-programs)
+* [transform programs](#transform-programs)
+* [example automation scripts](#example-automation-scripts)
 
 # what is it?
 
-Scraping scripts for <a href="http://wykop.pl">wykop.pl</a> website. Using BeatifulSoup4.
+Scraping programs for <a href="http://wykop.pl">wykop.pl</a> website. Using BeatifulSoup4 and custom-made API.
 
-# scraping scripts
+# scraping programs
 
-Scraping scripts are collected under the prefix ```scrap_*.py```. Overall strategy is to gather information around tags. 
+Scraping programs are collected under the prefix ```scrap_*.py```. Overall strategy is to gather information around tags. 
 
 
 - (**```scrap_top_tags.py```**) - scrapes the top tags from <a href="https://www.wykop.pl/tagi">https://www.wykop.pl/tagi</a>.
@@ -104,7 +105,7 @@ Scraping scripts are collected under the prefix ```scrap_*.py```. Overall strate
   ```
   which creates a csv file *datadir/best_wydarzenia_2022-07-01_2022-08-01.user* containing basic userdata about authors found in links LINKS_FILE.
 
-# transform scripts
+# transform programs
 
 After the scraping, we provide scripts (collected under the prefix ```transform_*.py```) which either clean or otherwise transform the scraped data into single format, unifies the missing records etc.
 
@@ -140,4 +141,83 @@ After the scraping, we provide scripts (collected under the prefix ```transform_
   ```
   python transform_diff_links.py --links_file all_wydarzenia_2022-07-01_2022-08-01.link 
                                  --lins_file_diff best_wydarzenia_2022-07-01_2022-08-01.link
+  ```
+
+
+# example automation scripts
+
+We provide automation scripts *##-pipeline.sh* in *example_scripts* directory. They roughly form a pipeline ordered by the prefixes. We describe the steps below. Working directory is *data*. All scripts have SLURM variants *##-gmum-sbatch.sh*.
+
+* **Find top tags**. Top tags are extracted using the scrap_top_tags.py and saved to *top_tags.txt*.
+
+  **input**: none
+  
+  **output**: *top_tags.txt*
+  
+  ```
+  python scrap_top_tags.py --tags_file top_tags.txt
+  ```
+* **Find lists of link ids**. In this stage we go through all of the tags in the top_tags.txt (TAGSFILE) file and,
+for each, compose an *.id file containing a list of link_ids within the hardcoded date boundaries [STARTDATE, ENDDATE]. Store it in *data* (DATADIR) directory.
+
+  **input**: *top_tags.txt*
+  
+  **output**: *data/best_\*.id* and *data/all_\*.id*
+  
+  ```
+	./example_scripts/04a-pipeline-tags-to-link_ids-best.sh top_tags.txt
+	./example_scripts/04b-pipeline-tags-to-link_ids-all.sh top_tags.txt
+  ```
+
+* **Gather links from link_id lists**. For each .id file create an .link file with scraped data about particular link. Store everything in *data* (DATADIR) directory.
+Since it is the labourious process, it has a safety feature which does not pursue the .id file if there is already an associated .link file.
+
+  **input**: *data/\*.id*
+  
+  **output**: *data/\*.link*
+  
+
+  ```
+	./example_scripts/05-pipeline-link_ids-to-links.sh 
+  ```
+
+
+* **Cleaning link files**. As an additional step we clean the link files which may contain nans and empty records. Furthermore, it ensures that both id and link files are in accordance and match the set time interval. By default these run on all files in the *data* (DATADIR) directory. They are quite fast so gmum script is not included.
+
+  **input**: *data/\*.id* and *data/\*.link* and *data/\*.vote*
+  
+  **output**: *data/\*.id* and *data/\*.link* and *data/\*.vote*
+
+  ```
+	./example_scripts/06-pipeline-clean-data_links.sh
+  ```
+
+* **Discard best/all duplicate links**. Loop over *top_tags.txt* (TAGSFILE). Discard the best links from *data/best_\*.link* from all links stored in *data/all_\*.link*. As is, the *all_\*.link* file contains literally all links and so the best links are also included. On top of updating all links, the corresponding *.id* files are modified.
+
+  **input**: *top_tags.txt*, *data/\*.id* and *data/\*.link*
+  
+  **output**: *data/\*.id* and *data/\*.link*
+  
+  ```
+  ./example_scripts/07-pipeline-difference-links.sh top_tags.txt
+  ```
+
+* **Gather votes for a subset of tags**. Loop over *tags_to_votes.txt* (TAGSFILE) and collect voting structure for each *.id* file in *data* (DATADIR) directory. Store everything in a *.vote* file.
+
+  **input**: *tags_to_votes.txt*, *data/\*.id*
+  
+  **output**: *data/\*.vote*
+
+  ```
+  ./example_scripts/08a-pipeline-link_ids-to-votes-subset.sh tags_to_votes.txt
+  ```
+
+* **Gather basic userdata for authors in a subset of tags**. Loop over *tags_to_users.txt* (TAGSFILE), collect basic user data of the authors found in each *data/\*.link* file. Store everything in *data* (DATADIR) directory in a corresponding *.user* file. 
+
+  **input**: *tags_to_users.txt*, *data/\*.link*
+  
+  **output**: *data/\*.user*
+
+  ```
+  ./example_scripts/09a-pipeline-links-to-basic-userdata-subset.sh tags_to_users.txt
   ```
