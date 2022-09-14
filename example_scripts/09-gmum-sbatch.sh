@@ -15,7 +15,7 @@ conda activate graph_scrap
 cd $HOME/graph_scrap/wykop-scrap
 
 #port=$1
-./07-pipeline-difference-link_ids.sh
+./example_scripts/09-pipeline-links-to-basic-userdata.sh
 #/usr/bin/ssh -N -f -R $port:localhost:$port gw.gmum
 #jupyter notebook --no-browser --port $port
 #jupyter notebook --ip 0.0.0.0 --port $port
