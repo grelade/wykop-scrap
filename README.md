@@ -6,7 +6,8 @@
 
 # what is it?
 
-Scraping programs for <a href="http://wykop.pl">wykop.pl</a> website. Using BeatifulSoup4 and custom-made API.
+Scraping programs for <a href="http://wykop.pl">wykop.pl</a> website. Using BeatifulSoup4 and custom-made API. Used in blogposts:
+* https://grelade.github.io/what-is-happening-on-wykop-pt1/
 
 # scraping programs
 
