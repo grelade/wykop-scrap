@@ -6,7 +6,11 @@
 
 # what is it?
 
-Scraping programs for <a href="http://wykop.pl">wykop.pl</a> website. Using BeatifulSoup4 and custom-made API. Used in blog posts:
+Scraping programs for <a href="http://wykop.pl">wykop.pl</a> website. Using BeatifulSoup4 and custom-made API. 
+
+It was used in preparing publicly available dataset [wykop-data-2022](https://www.kaggle.com/datasets/grelade/wykop-data-2022).
+
+I wrote some **blog posts** analyzing this dataset:
 * https://grelade.github.io/what-is-happening-on-wykop-pt1/
 * https://grelade.github.io/what-is-happening-on-wykop-pt2/
 * https://grelade.github.io/what-is-happening-on-wykop-pt3/
